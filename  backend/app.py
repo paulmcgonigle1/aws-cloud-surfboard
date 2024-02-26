@@ -64,6 +64,27 @@ def get_all_boards():
         )
 
 
+# getting all boards
+@app.route("/getBoardsByType/<type>", methods=["GET"])
+def get_boards_by_type(type):
+    # Invoke Lambda via API Gateway
+    api_gateway_url = f"{API_GATEWAY_BASE_URL}/surfboards/type/{type}"
+
+    response = requests.get(api_gateway_url)
+    logging.debug(f"Received response from Lambda: {response.text}")
+    # Handle response (e.g., check for success/failure)
+    print("Response data:", response)
+
+    if response.status_code == 200:
+        surfboards_data = response.json()  # Assuming the response from Lambda is JSON
+        return jsonify(surfboards_data), 200
+    else:
+        return (
+            jsonify({"error": "Failed to upload "}),
+            response.status_code,
+        )
+
+
 # upload by file
 @app.route("/upload", methods=["POST"])
 def upload_file():
@@ -84,9 +105,16 @@ def upload_file():
         # invoking the api gateway
         response = requests.post(API_GATEWAY_ENDPOINT, json=payload)
         logging.debug(f"Received response from Lambda: {response.text}")
+        count = 1
+        if response.status_code == 200:
+            print(f"File {count} uploaded successfully(Flask)")
+            count += 1
+
+        else:
+            print(f"File {count} failed to upload(Flask)")
         # Handle response (e.g., check for success/failure)
 
-    return jsonify({"message": "Files uploaded successfully"})
+    return jsonify({"message": "Files uploaded successfully(Flask)"})
 
 
 if __name__ == "__main__":

@@ -5,14 +5,12 @@ import axios from 'axios';
 
 const GetAllSurfboardsComponent = () => {
     const [surfboards, setSurfboards] = useState([]);
-
+    const [type, setType] = useState('');
    //setting up to work with backend flask
    const fetchSurfboards = async () => {
     try {
       const response = await axios.get('http://localhost:5000/getAllBoards');
-      
       console.log("Response: " , response)
-
       setSurfboards(response.data || []); // Fallback to an empty array if Items is undefined
 
     } catch (error) {
@@ -21,6 +19,23 @@ const GetAllSurfboardsComponent = () => {
 
     }
   };
+
+   //using the secondary index to get by type
+    const fetchSurfboardsByType = async () => {
+      if (!type) {
+          alert('Please select a type first.');
+          return;
+      }
+      try {
+          const response = await axios.get(`http://localhost:5000//getBoardsByType/${type}`);
+          console.log("Response by Type: ", response);
+          setSurfboards(response.data || []);
+      } catch (error) {
+          console.error(`Error fetching surfboards of type ${type}:`, error);
+          setSurfboards([]);
+      }
+  };
+  
   const deleteSurfboard = async (surfboardId, price) => {
   try {
     await axios.delete(`http://localhost:5000/deleteById/${surfboardId}?price=${price}`);
@@ -33,7 +48,19 @@ const GetAllSurfboardsComponent = () => {
   
   return (
     <div>
-      <button onClick={fetchSurfboards}>Get Surfboards</button>
+      <div>
+      <input
+                type="text"
+                value={type}
+                onChange={(e) => setType(e.target.value)}
+                placeholder="Enter surfboard type"
+                style={{ marginRight: '10px' }}
+            />
+            <button onClick={fetchSurfboards}>Get All Surfboards</button>
+            <button onClick={fetchSurfboardsByType} style={{ marginLeft: '10px' }}>Get Surfboards By Type</button>
+      </div>
+     
+      
       {surfboards.length > 0 ? (
         <div>
           {surfboards.map((surfboard, index) => (
